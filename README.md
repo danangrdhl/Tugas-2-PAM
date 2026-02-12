@@ -9,4 +9,5 @@ Berikut adalah tampilan aplikasi saat dijalankan:
 
 <img width="369" height="769" alt="Screenshot 2026-02-12 173727" src="https://github.com/user-attachments/assets/b8260f37-1e59-4522-a11b-4e354f9997cb" />
 
-<img width="374" height="767" alt="Screenshot 2026-02-12 173806" src="https://github.com/user-attachments/assets/09704472-57d4-4850-8685-2c5eb43a036d" />
+<img width="368" height="775" alt="Screenshot 2026-02-12 175644" src="https://github.com/user-attachments/assets/86fec1a4-3a7c-44c6-bd7f-d6218c7183ba" />
+
