@@ -7,13 +7,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.*
@@ -108,36 +109,58 @@ class NewsViewModel {
 @Composable
 @Preview
 fun App() {
-    MaterialTheme {
+    MaterialTheme(
+        colorScheme = lightColorScheme(
+            primary = Color(0xFF0D47A1),
+            secondary = Color(0xFF1976D2),
+            background = Color(0xFFF5F5F5),
+            surface = Color.White
+        )
+    ) {
         val viewModel = remember { NewsViewModel() }
         val newsItems by viewModel.newsList.collectAsState()
         val readCount by viewModel.readCount.collectAsState()
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-                .padding(16.dp)
-        ) {
-            StatsCard(readCount)
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = "Live News Feed (Update 2s)",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+        Scaffold(
+            containerColor = MaterialTheme.colorScheme.background
+        ) { paddingValues ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(16.dp)
             ) {
-                items(newsItems, key = { it.id }) { news ->
-                    NewsItemCard(
-                        news = news,
-                        onReadMore = { viewModel.loadDetail(news.id) }
+                StatsCard(readCount)
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "LIVE FEED",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Gray
                     )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Surface(
+                        modifier = Modifier.size(8.dp),
+                        shape = RoundedCornerShape(50),
+                        color = Color.Red
+                    ) {}
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(bottom = 16.dp)
+                ) {
+                    items(newsItems, key = { it.id }) { news ->
+                        NewsItemCard(
+                            news = news,
+                            onReadMore = { viewModel.loadDetail(news.id) }
+                        )
+                    }
                 }
             }
         }
@@ -147,23 +170,37 @@ fun App() {
 @Composable
 fun StatsCard(count: Int) {
     Card(
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-        modifier = Modifier.fillMaxWidth()
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary),
+        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier
+                .padding(20.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Icon(Icons.Default.Info, contentDescription = null)
-            Spacer(modifier = Modifier.width(8.dp))
             Column {
-                Text(text = "Status Pembaca", style = MaterialTheme.typography.labelMedium)
                 Text(
-                    text = "$count Berita Dibaca",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
+                    text = "Total Dibaca",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.White.copy(alpha = 0.8f)
+                )
+                Text(
+                    text = "$count Berita",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
                 )
             }
+            Icon(
+                imageVector = Icons.Default.Notifications,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(32.dp)
+            )
         }
     }
 }
@@ -173,59 +210,84 @@ fun NewsItemCard(news: News, onReadMore: () -> Unit) {
     var isLoading by remember { mutableStateOf(false) }
 
     Card(
+        colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(12.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Surface(
-                color = if (news.category == "TEKNOLOGI") Color.Blue.copy(alpha = 0.1f) else Color.Red.copy(alpha = 0.1f),
-                shape = RoundedCornerShape(4.dp)
+                color = when (news.category) {
+                    "TEKNOLOGI" -> Color(0xFFE3F2FD)
+                    "POLITIK" -> Color(0xFFFFEBEE)
+                    else -> Color(0xFFF3E5F5)
+                },
+                shape = RoundedCornerShape(8.dp)
             ) {
                 Text(
                     text = news.category,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurface
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-            Text(text = news.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            Text(text = news.summary, style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+            Text(
+                text = news.title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = news.summary,
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Gray,
+                maxLines = if (news.isDetailLoaded) Int.MAX_VALUE else 2,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             if (news.isDetailLoaded) {
-                Column(
-                    modifier = Modifier
-                        .background(Color.LightGray.copy(alpha = 0.2f))
-                        .padding(8.dp)
-                        .fillMaxWidth()
-                ) {
-                    Text(text = "Detail:", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
-                    Text(text = news.detailContent, style = MaterialTheme.typography.bodySmall)
-                }
+                Divider(color = Color.LightGray.copy(alpha = 0.5f))
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "DETAIL LENGKAP",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = news.detailContent,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
             } else {
-                Button(
-                    onClick = {
-                        isLoading = true
-                        onReadMore()
-                    },
-                    enabled = !isLoading,
-                    modifier = Modifier.align(Alignment.End)
-                ) {
-                    if (isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(16.dp),
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            strokeWidth = 2.dp
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Memuat...")
-                    } else {
-                        Text("Baca Selengkapnya")
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
+                    Button(
+                        onClick = {
+                            isLoading = true
+                            onReadMore()
+                        },
+                        enabled = !isLoading,
+                        shape = RoundedCornerShape(8.dp),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                    ) {
+                        if (isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(16.dp),
+                                color = Color.White,
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Text("Baca Selengkapnya")
+                        }
                     }
                 }
             }
